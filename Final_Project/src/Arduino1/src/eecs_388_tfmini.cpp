@@ -46,19 +46,23 @@ while( 1 )
 
         /*FINAL PROJECT: greater than 200 cm is green, 
         100-200 is yellow, 60-100 is red brake hard, less than 60 is flashing red */
+        /*green*/
          if (dist > 200 ) 
             {
-          
+            gpio_write(GPIO_13, OFF);   /* red */
             gpio_write(GPIO_12, ON);   /* green */
+            gpio_write(GPIO_11, OFF);   /* Blue */
             }
-        if (dist < 200 && dist > 100) 
+            /*yellow*/
+        else if (dist < 200 && dist > 100) 
             {
             gpio_write(GPIO_13, ON);    /* red */
-            gpio_write(GPIO_12, OFF);   /* green */
+            gpio_write(GPIO_12, ON);   /* green */
+            gpio_write(GPIO_11, OFF); /*blue*/
             }
         
         /*red*/
-        if (dist < 100 && dist > 60) 
+        else if (dist < 100 && dist > 60) 
             {
             gpio_write(GPIO_13, ON);    /* red */
             
@@ -66,7 +70,7 @@ while( 1 )
             gpio_write(GPIO_11, OFF);    /* blue */
             }
         /*flashing red*/
-        if (dist < 60) 
+        else if (dist < 60) 
             {
             gpio_write(GPIO_13, ON);    /* red */
             
