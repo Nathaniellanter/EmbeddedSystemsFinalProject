@@ -43,7 +43,9 @@ while( 1 )
         bool chk_ok = (sum == chk_byte);     /* uint8_t wraps = low byte */
 
         /* Task 1.3: 75 cm threshold per the handout */
-        if (dist < 75) 
+
+        /*FINAL PROJECT: greater than 200 cm is green, 100-200 is yellow, 60-100 is red brake hard, less than 60 is flashing red */
+        if (dist < 200) 
             {
             gpio_write(GPIO_13, ON);    /* red */
             gpio_write(GPIO_12, OFF);   /* green */
