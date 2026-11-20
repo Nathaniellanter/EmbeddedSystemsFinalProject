@@ -45,8 +45,10 @@ while( 1 )
         /* Task 1.3: 75 cm threshold per the handout */
 
         /*FINAL PROJECT: greater than 200 cm is green, 
-        100-200 is yellow, 60-100 is red brake hard, less than 60 is flashing red */
+        100-200 is yellow, 60-100 is red brake hard, less than 60 is flashing red */ /*still need to add signals in logic so*/
         /*green*/
+        static uint8_t flash_state = OFF;
+        static unsigned long last_flash_time = 0;
          if (dist > 200 ) 
             {
             gpio_write(GPIO_13, OFF);   /* red */
@@ -54,6 +56,8 @@ while( 1 )
             gpio_write(GPIO_11, OFF);   /* Blue */
             }
             /*yellow*/
+
+            
         else if (dist < 200 && dist > 100) 
             {
             gpio_write(GPIO_13, ON);    /* red */
@@ -72,7 +76,13 @@ while( 1 )
         /*flashing red*/
         else if (dist < 60) 
             {
-            gpio_write(GPIO_13, ON);    /* red */
+            unsigned long now = millis();
+            if (now - last_flash_time >= 100UL)
+                {
+                flash_state = !flash_state;
+                last_flash_time = now;
+                }
+            gpio_write(GPIO_13, flash_state);    /* red */
             
             gpio_write(GPIO_12, OFF);   /* green */
             gpio_write(GPIO_11, OFF);    /* blue */
