@@ -58,7 +58,7 @@ while( 1 )
             /*yellow*/
 
             
-        else if (dist < 200 && dist > 100) 
+        else if (dist <= 200 && dist > 100) 
             {
             gpio_write(GPIO_13, ON);    /* red */
             gpio_write(GPIO_12, ON);   /* green */
@@ -66,7 +66,7 @@ while( 1 )
             }
         
         /*red*/
-        else if (dist < 100 && dist > 60) 
+        else if (dist <= 100 && dist > 60) 
             {
             gpio_write(GPIO_13, ON);    /* red */
             
@@ -74,7 +74,7 @@ while( 1 )
             gpio_write(GPIO_11, OFF);    /* blue */
             }
         /*flashing red*/
-        else if (dist < 60) 
+        else if (dist <= 60) 
             {
             unsigned long now = millis();
             if (now - last_flash_time >= 100UL)
