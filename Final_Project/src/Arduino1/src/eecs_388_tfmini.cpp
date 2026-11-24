@@ -2,16 +2,47 @@
  *   Header Includes
  *******************************************************************************/
 #include <Arduino.h>
+#include <Servo.h>
 #include <stdint.h>
 #include <stdio.h>
 
 #include "eecs_388_lib.h"
+
+static const uint8_t steering_angles[] = {10, 25, 75, 45, 100, 40, 125, 15, 150, 50, 170};
+static const unsigned long steering_interval_ms = 1000UL;
+static Servo steering_servo;
+static uint8_t steering_index = 0;
+static unsigned long last_steering_update = 0;
+
+static void update_steering()
+{
+unsigned long now = millis();
+if (now - last_steering_update >= steering_interval_ms)
+    {
+    steering_index = (steering_index + 1) % (sizeof(steering_angles) / sizeof(steering_angles[0]));
+    steering_servo.write(steering_angles[steering_index]);
+    last_steering_update = now;
+    }
+}
+
+static char ser_read_with_steering()
+{
+while (!(UCSR0A & (1 << RXC0)))
+    {
+    update_steering();
+    }
+return ser_read();
+}
 
 void setup() 
 {
 gpio_mode(GPIO_13, GPIO_OUTPUT);
 gpio_mode(GPIO_12, GPIO_OUTPUT);
 gpio_mode(GPIO_11, GPIO_OUTPUT);   /* ADDED (Task 1.5, blue LED) */
+
+steering_servo.attach(GPIO_9);
+steering_servo.write(steering_angles[steering_index]);
+last_steering_update = millis();
 
 uart_init();
 
@@ -27,19 +58,20 @@ ser_write( '\n' );
 ser_printf("%u", dist);
 while( 1 )
     { 
-    if ('Y' == ser_read() && 'Y' == ser_read()) 
+    update_steering();
+    if ('Y' == ser_read_with_steering() && 'Y' == ser_read_with_steering())
         {
-            uint8_t dist_l = ser_read();   /* byte 3 */
-        uint8_t dist_h = ser_read();   /* byte 4 */
+            uint8_t dist_l = ser_read_with_steering();   /* byte 3 */
+        uint8_t dist_h = ser_read_with_steering();   /* byte 4 */
         dist = ((uint16_t)dist_h << 8) | dist_l;
         uint8_t sum = 0x59 + 0x59 + dist_l + dist_h;   /* ADDED (Task 1.4) */
         
         /* CHANGED (Task 1.4): was a loop that read and discarded 5 bytes */
         for (uint8_t i = 0; i < 4; i++)      /* bytes 5-8 */
             {
-            sum += ser_read();
+            sum += ser_read_with_steering();
             }
-        uint8_t chk_byte = ser_read();       /* byte 9 */
+        uint8_t chk_byte = ser_read_with_steering();       /* byte 9 */
         bool chk_ok = (sum == chk_byte);     /* uint8_t wraps = low byte */
 //test for sending distance and checksum to serial port
         if (chk_ok)
