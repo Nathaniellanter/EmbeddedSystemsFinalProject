@@ -24,7 +24,7 @@ uint16_t dist = 0;              /* LIDAR distance data is 16 bits. */
 uint8_t frame_count =0;
 ser_printline("Setup completed.");
 ser_write( '\n' );
-
+ser_printf("%u", dist);
 while( 1 )
     { 
     if ('Y' == ser_read() && 'Y' == ser_read()) 
@@ -33,7 +33,7 @@ while( 1 )
         uint8_t dist_h = ser_read();   /* byte 4 */
         dist = ((uint16_t)dist_h << 8) | dist_l;
         uint8_t sum = 0x59 + 0x59 + dist_l + dist_h;   /* ADDED (Task 1.4) */
-
+        
         /* CHANGED (Task 1.4): was a loop that read and discarded 5 bytes */
         for (uint8_t i = 0; i < 4; i++)      /* bytes 5-8 */
             {
@@ -44,7 +44,7 @@ while( 1 )
 
         /* Task 1.3: 75 cm threshold per the handout */
 
-        /*FINAL PROJECT: greater than 200 cm is green, 
+        /*FINAL PROJECT task 2: greater than 200 cm is green, 
         100-200 is yellow, 60-100 is red brake hard, less than 60 is flashing red */ /*still need to add signals in logic so*/
         /*green*/
         static uint8_t flash_state = OFF;
@@ -54,6 +54,7 @@ while( 1 )
             gpio_write(GPIO_13, OFF);   /* red */
             gpio_write(GPIO_12, ON);   /* green */
             gpio_write(GPIO_11, OFF);   /* Blue */
+            
             }
             /*yellow*/
 
@@ -88,7 +89,7 @@ while( 1 )
             gpio_write(GPIO_11, OFF);    /* blue */
             }
         /* print about once per second (100 frames/sec) */
-        if (++frame_count >= 100) 
+        if (++frame_count >= 10) 
             {
             frame_count = 0;
             ser_printf("dist = %u cm", dist);
@@ -96,6 +97,7 @@ while( 1 )
             }
 
         }
+        
     }
 
 return;
