@@ -46,6 +46,36 @@ static uint16_t read_distance()
     }
 }
 
+static void print_distance(uint16_t distance)
+{
+    char digits[5];
+    uint8_t digit_count = 0;
+
+    do
+    {
+        digits[digit_count++] = (char)('0' + (distance % 10));
+        distance /= 10;
+    } while (distance > 0);
+
+    ser_write('D');
+    ser_write('i');
+    ser_write('s');
+    ser_write('t');
+    ser_write('a');
+    ser_write('n');
+    ser_write('c');
+    ser_write('e');
+    ser_write(':');
+    ser_write(' ');
+
+    while (digit_count > 0)
+    {
+        ser_write(digits[--digit_count]);
+    }
+
+    ser_printline(" cm");
+}
+
 void setup()
 {
     uart_init();
@@ -67,7 +97,13 @@ void setup()
 void loop()
 {
     uint16_t distance = read_distance();
+    static uint8_t frames_since_print = 0;
 
+    if (++frames_since_print >= 10)
+    {
+        frames_since_print = 0;
+        print_distance(distance);
+    }
     if (distance > 200)
     {
         gpio_write(GPIO_13, OFF);
@@ -102,6 +138,6 @@ void loop()
         gpio_write(GPIO_12, OFF);
         gpio_write(GPIO_11, OFF);
     }
-    printf("Distance: %d\n", distance);
+
     return;
 }
