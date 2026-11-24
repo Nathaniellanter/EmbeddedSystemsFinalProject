@@ -40,7 +40,7 @@ gpio_mode(GPIO_13, GPIO_OUTPUT);
 gpio_mode(GPIO_12, GPIO_OUTPUT);
 gpio_mode(GPIO_11, GPIO_OUTPUT);   /* ADDED (Task 1.5, blue LED) */
 
-steering_servo.attach(GPIO_9);
+steering_servo.attach(GPIO_6);
 steering_servo.write(steering_angles[steering_index]);
 last_steering_update = millis();
 
