@@ -41,6 +41,16 @@ while( 1 )
             }
         uint8_t chk_byte = ser_read();       /* byte 9 */
         bool chk_ok = (sum == chk_byte);     /* uint8_t wraps = low byte */
+//test for sending distance and checksum to serial port
+        if (chk_ok)
+            {
+            uint8_t packet_sum = 0xA5 + 0x5A + dist_l + dist_h;
+            ser_write((char)0xA5);
+            ser_write((char)0x5A);
+            ser_write((char)dist_l);
+            ser_write((char)dist_h);
+            ser_write((char)packet_sum);
+            }
 
         /* Task 1.3: 75 cm threshold per the handout */
 
@@ -92,7 +102,8 @@ while( 1 )
         if (++frame_count >= 10) 
             {
             frame_count = 0;
-            ser_printf("dist = %u cm", dist);
+            ser_printf("%ucm", dist);
+            //ser_printf("dist = %u cm", dist);
             ser_printf("checksum %s", chk_ok ? "OK" : "BAD");   /* ADDED */
             }
 
