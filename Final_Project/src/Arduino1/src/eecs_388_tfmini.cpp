@@ -89,6 +89,9 @@ while( 1 )
         /*FINAL PROJECT task 2: greater than 200 cm is green, 
         100-200 is yellow, 60-100 is red brake hard, less than 60 is flashing red */ /*still need to add signals in logic so*/
         /*green*/
+
+
+        //NOW REDUNDANT SINCE CODE IS ALSO IN ARDUINO2
         static uint8_t flash_state = OFF;
         static unsigned long last_flash_time = 0;
          if (dist > 200 ) 
