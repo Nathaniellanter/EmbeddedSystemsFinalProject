@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <Servo.h>
 #include "eecs_388_lib2.h"
 
 /******************************************************************************
@@ -17,18 +18,44 @@
  *******************************************************************************/
 
 
+static const uint8_t steering_angles[] = {10, 25, 75, 45, 100, 40, 125, 15, 150, 50, 170};
+static const unsigned long steering_interval_ms = 1000UL;
+static Servo steering_servo;
+static uint8_t steering_index = 0;
+static unsigned long last_steering_update = 0;
+
+static void update_steering()
+{
+unsigned long now = millis();
+if (now - last_steering_update >= steering_interval_ms)
+    {
+    steering_index = (steering_index + 1) % (sizeof(steering_angles) / sizeof(steering_angles[0]));
+    steering_servo.write(steering_angles[steering_index]);
+    last_steering_update = now;
+    }
+}
+
+static char ser_read_with_steering()
+{
+while (!(UCSR0A & (1 << RXC0)))
+    {
+    update_steering();
+    }
+return ser_read();
+}
+
 static uint16_t read_distance()
 {
     uint8_t previous = 0;
 
     while (true)
     {
-        uint8_t current = (uint8_t)ser_read();
+        uint8_t current = (uint8_t)ser_read_with_steering();
         if (previous == 0xA5 && current == 0x5A)
         {
-            uint8_t distance_low = (uint8_t)ser_read();
-            uint8_t distance_high = (uint8_t)ser_read();
-            uint8_t checksum = (uint8_t)ser_read();
+            uint8_t distance_low = (uint8_t)ser_read_with_steering();
+            uint8_t distance_high = (uint8_t)ser_read_with_steering();
+            uint8_t checksum = (uint8_t)ser_read_with_steering();
             uint8_t expected_checksum =
                 (uint8_t)(0xA5 + 0x5A + distance_low + distance_high);
 
@@ -82,6 +109,10 @@ void setup()
     gpio_mode(GPIO_13, GPIO_OUTPUT);
     gpio_mode(GPIO_12, GPIO_OUTPUT);
     gpio_mode(GPIO_11, GPIO_OUTPUT);
+
+    steering_servo.attach(GPIO_9);
+    steering_servo.write(steering_angles[steering_index]);
+    last_steering_update = millis();
 
     return;
 }
